@@ -3,164 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BE Sample Size Calculator & Visualizer</title>
+    <title>BE SAMPLE SIZE VISUAL PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #f4f7f6;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--primary-color); line-height: 1.6; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        header { border-bottom: 2px solid var(--accent-color); margin-bottom: 30px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .input-group { display: flex; flex-direction: column; }
-        label { font-weight: bold; margin-bottom: 8px; font-size: 0.9em; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; }
-        .result-box { background: #eef2f7; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center; }
-        .result-value { font-size: 2em; font-weight: bold; color: var(--accent-color); }
-        canvas { margin-top: 30px; max-height: 350px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-calc { background: var(--accent-color); color: white; }
-        .btn-print { background: #95a5a6; color: white; }
-        button:hover { opacity: 0.8; }
-        .disclaimer { font-size: 0.8em; color: #7f8c8d; margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 10px; }
-        @media print { .btn-group, .disclaimer { display: none; } .container { box-shadow: none; border: none; } }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .card { background: white; border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .gradient-bg { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); }
+        input, select { outline: none; background: transparent; }
+        .input-box { transition: all 0.3s ease; border: 1px solid transparent; }
+        .input-box:focus-within { border-color: #6366f1; background: white; }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-<div class="container">
-    <header>
-        <h2>BE Sample Size Calculator</h2>
-        <small>Bioequivalence Study Design</small>
-    </header>
-
-    <div class="input-grid">
-        <div class="input-group">
-            <label>Intra-subject CV (%)</label>
-            <input type="number" id="cv" value="20" step="0.1">
+    <div class="max-w-7xl mx-auto mb-8 flex justify-between items-end">
+        <div>
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-xl text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-800 italic uppercase tracking-tight">Bioequivalence <span class="text-indigo-600">Sample Size</span> <span class="text-slate-400">Visual Pro</span></h1>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold mt-1 tracking-widest uppercase">Statistical Power & Equivalence Optimization System</p>
         </div>
-        <div class="input-group">
-            <label>Expected GMR (T/R Ratio)</label>
-            <input type="number" id="gmr" value="0.95" step="0.01">
-        </div>
-        <div class="input-group">
-            <label>Target Power (%)</label>
-            <select id="power">
-                <option value="0.8">80%</option>
-                <option value="0.9">90%</option>
-            </select>
-        </div>
-        <div class="input-group">
-            <label>Expected Dropout Rate (%)</label>
-            <input type="number" id="dropout" value="10" step="1">
+        <div class="text-right">
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Principal Developer</p>
+            <p class="text-sm font-bold text-indigo-600 underline">Taeheon Kim, PhD</p>
         </div>
     </div>
 
-    <div class="btn-group">
-        <button class="btn-calc" onclick="calculate()">계산하기 (Calculate)</button>
-        <button class="btn-print" onclick="window.print()">결과 저장 (PDF/Print)</button>
-    </div>
-
-    <div class="result-box">
-        <div id="resultText">필요한 샘플 수 (N): <span class="result-value">-</span></div>
-        <div id="totalText" style="margin-top:10px; font-weight:bold;">총 모집 인원 (탈락률 반영): <span>-</span></div>
-    </div>
-
-    <canvas id="distChart"></canvas>
-
-    <div class="disclaimer">
-        * 본 계산기는 Diletti et al. (1991)의 공식을 기반으로 한 근사치를 제공합니다.<br>
-        * 실제 시험 설계 시 반드시 통계 전문가 및 규제 가이드라인을 확인하시기 바랍니다.
-    </div>
-</div>
-
-<script>
-    let myChart;
-
-    function calculate() {
-        const cv = document.getElementById('cv').value / 100;
-        const gmr = document.getElementById('gmr').value;
-        const power = document.getElementById('power').value;
-        const dropout = document.getElementById('dropout').value / 100;
-
-        // 1. 샘플 수 계산 (Diletti's Approx Method)
-        // BE 기준: ln(0.8) ~ ln(1.25)
-        const alpha = 0.05;
-        const z_alpha = 1.645; // 90% CI
-        const z_beta = (power == 0.8) ? 0.842 : 1.282;
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        const sigma_sq = Math.log(cv**2 + 1);
-        const diff = Math.min(Math.abs(Math.log(gmr) - Math.log(0.8)), Math.abs(Math.log(1.25) - Math.log(gmr)));
-        
-        let n = (2 * (z_alpha + z_beta)**2 * sigma_sq) / (Math.pow(Math.log(1.25) - Math.abs(Math.log(gmr)), 2));
-        n = Math.ceil(n);
-        if (n % 2 !== 0) n++; // Crossover 설계이므로 짝수 맞춤
-        if (n < 12) n = 12; // 최소 권장 인원
+        <div class="card p-8">
+            <h3 class="flex items-center gap-2 text-xs font-black text-slate-800 mb-8 uppercase tracking-[0.2em]">
+                <span class="w-1.5 h-4 bg-indigo-500 rounded-full"></span> Input Parameters
+            </h3>
+            
+            <div class="space-y-5">
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl input-box">
+                    <label class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Study Design</label>
+                    <select id="design" onchange="calculate()" class="text-sm font-bold text-slate-800 text-right cursor-pointer">
+                        <option value="2x2">2x2 Crossover</option>
+                        <option value="parallel">Parallel Design</option>
+                        <option value="2xk">2xK Design (Replicate)</option>
+                    </select>
+                </div>
 
-        const totalN = Math.ceil(n / (1 - dropout));
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl input-box">
+                    <label class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Intra-subject CV (%)</label>
+                    <input type="number" id="cv" value="20" oninput="calculate()" class="text-sm font-bold text-slate-800 text-right w-20">
+                </div>
 
-        document.querySelector('#resultText span').innerText = n;
-        document.querySelector('#totalText span').innerText = totalN;
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl input-box">
+                    <label class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Expected GMR (T/R Ratio)</label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="gmr" value="0.95" step="0.01" oninput="calculate()" class="text-sm font-bold text-slate-800 text-right w-20">
+                        <span class="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded font-bold">90% CI</span>
+                    </div>
+                </div>
 
-        updateChart(gmr);
-    }
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-slate-50 rounded-2xl input-box">
+                        <label class="text-[11px] font-black text-slate-500 uppercase tracking-wider block mb-2">Target Power</label>
+                        <select id="power" onchange="calculate()" class="text-sm font-bold text-indigo-600">
+                            <option value="0.8">80%</option>
+                            <option value="0.9">90%</option>
+                        </select>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-2xl input-box">
+                        <label class="text-[11px] font-black text-slate-500 uppercase tracking-wider block mb-2">Dropout Rate (%)</label>
+                        <input type="number" id="dropout" value="10" oninput="calculate()" class="text-sm font-bold text-slate-800 w-full">
+                    </div>
+                </div>
+            </div>
 
-    function updateChart(gmr) {
-        const ctx = document.getElementById('distChart').getContext('2d');
-        const labels = [];
-        const data = [];
-        const logGMR = Math.log(gmr);
-        const lower = Math.log(0.8);
-        const upper = Math.log(1.25);
-        
-        // 정규분포 곡선 데이터 생성 (log scale)
-        for (let x = -0.5; x <= 0.5; x += 0.01) {
-            labels.push(Math.exp(x).toFixed(2));
-            const y = Math.exp(-0.5 * Math.pow(x / 0.15, 2)); // 시각화를 위한 임의 표준편차 0.15
-            data.push(y);
+            <div class="mt-8 flex gap-3">
+                <button onclick="calculate()" class="flex-1 bg-indigo-50 text-indigo-600 text-[11px] font-black py-4 rounded-2xl uppercase hover:bg-indigo-600 hover:text-white transition-all">Calculate</button>
+                <button onclick="window.print()" class="flex-1 bg-slate-100 text-slate-500 text-[11px] font-black py-4 rounded-2xl uppercase hover:bg-slate-200 transition-all">Save Results (PDF)</button>
+            </div>
+        </div>
+
+        <div class="card p-8">
+            <h3 class="flex items-center gap-2 text-xs font-black text-slate-800 mb-4 uppercase tracking-[0.2em]">
+                <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span> Visualization
+            </h3>
+            <div class="relative h-[300px]">
+                <canvas id="distChart"></canvas>
+            </div>
+            <p class="text-[10px] text-center text-slate-400 mt-4 font-medium italic">Normal distribution of T/R Ratio with 90% Acceptance Range (0.8 - 1.25)</p>
+        </div>
+
+        <div class="gradient-bg rounded-[2.5rem] p-10 text-white relative shadow-2xl shadow-indigo-200 overflow-hidden">
+            <div class="grid grid-cols-2 items-center relative z-10 h-full">
+                <div>
+                    <p class="text-[11px] font-bold opacity-70 uppercase tracking-[0.2em] mb-4">Required Sample Size</p>
+                    <div class="flex items-baseline">
+                        <h2 id="resultN" class="text-8xl font-black italic">18</h2>
+                        <span class="text-2xl ml-4 opacity-50 font-bold italic font-serif italic italic italic">Subjects</span>
+                    </div>
+                </div>
+                <div class="border-l border-white/20 pl-12">
+                    <p class="text-[11px] font-bold opacity-70 uppercase tracking-[0.2em] mb-4">Total Subjects (incl. Dropout)</p>
+                    <div class="flex items-baseline">
+                        <h2 id="totalN" class="text-6xl font-black opacity-90">20</h2>
+                        <span class="text-xl ml-3 opacity-40 font-bold uppercase italic">Enrollment</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-8 left-10 flex items-center gap-2 opacity-80">
+                <div class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                <p class="text-[10px] font-black tracking-widest uppercase italic">Statistical Logic: 2x2 Crossover Active</p>
+            </div>
+            <div class="absolute -top-10 -right-10 opacity-10 pointer-events-none">
+                <svg width="300" height="300" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+            </div>
+        </div>
+
+        <div class="card p-10 flex flex-col justify-between border border-slate-100">
+            <div class="space-y-4">
+                <h4 class="text-sm font-black text-indigo-600 uppercase italic">Methodology Note</h4>
+                <p class="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    This calculation is based on the Diletti et al. (1991) approach for bioequivalence. 
+                    The algorithm assumes a log-normal distribution for AUC and Cmax. 
+                    For highly variable drugs (CV > 30%), consider a replicate design.
+                </p>
+            </div>
+            <div class="pt-8 border-t border-slate-50 flex justify-between items-end">
+                <div class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                    Daewoong Pharm PK/PD Laboratory
+                </div>
+                <div class="bg-indigo-600 px-4 py-2 rounded-xl">
+                    <span class="text-[10px] text-white font-black italic">VER 2.0</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let myChart;
+
+        function calculate() {
+            const cv = parseFloat(document.getElementById('cv').value) / 100;
+            const gmr = parseFloat(document.getElementById('gmr').value);
+            const power = parseFloat(document.getElementById('power').value);
+            const dropout = parseFloat(document.getElementById('dropout').value) / 100;
+            const design = document.getElementById('design').value;
+
+            // Simple BE Sample Size Logic (Diletti's Table Approximation)
+            const zAlpha = 1.645; // 90% CI
+            const zBeta = power === 0.9 ? 1.282 : 0.842;
+            const sigma = Math.sqrt(Math.log(cv * cv + 1));
+            
+            // Equation based on 2x2 Crossover
+            let delta = Math.abs(Math.log(gmr) - Math.log(1.25));
+            if (gmr < 1) delta = Math.abs(Math.log(gmr) - Math.log(0.8));
+            
+            let n = 2 * Math.pow((zAlpha + zBeta) * sigma / delta, 2);
+            
+            // Adjust based on design
+            if (design === 'parallel') n = n * 2; 
+            if (design === '2xk') n = n * 0.75; // Approx reduction for replicate
+
+            n = Math.max(12, Math.ceil(n));
+            if (n % 2 !== 0) n++; // Ensure even for crossover
+
+            const totalEnrollment = Math.ceil(n / (1 - dropout));
+
+            // Update UI
+            document.getElementById('resultN').innerText = n;
+            document.getElementById('totalN').innerText = totalEnrollment;
+
+            updateChart(gmr, cv);
         }
 
-        if (myChart) myChart.destroy();
+        function updateChart(gmr, cv) {
+            const ctx = document.getElementById('distChart').getContext('2d');
+            const labels = [];
+            const data = [];
+            const stdDev = 0.1; // 시각화 고정 편차
 
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Acceptance Range (0.8 - 1.25)',
-                    data: data,
-                    fill: true,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                    borderColor: 'rgba(52, 152, 219, 1)',
-                    pointRadius: 0,
-                    segment: {
-                        backgroundColor: ctx => {
-                            const val = parseFloat(labels[ctx.p0DataIndex]);
-                            return (val >= 0.8 && val <= 1.25) ? 'rgba(52, 152, 219, 0.5)' : 'rgba(200, 200, 200, 0.1)';
-                        }
-                    }
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: true },
-                    tooltip: { enabled: true }
-                },
-                scales: {
-                    x: { title: { display: true, text: 'T/R Ratio (Geometric Mean)' } },
-                    y: { display: false }
-                }
+            for (let x = 0.5; x <= 1.5; x += 0.01) {
+                labels.push(x.toFixed(2));
+                // Normal Distribution Formula
+                const y = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - gmr) / stdDev, 2));
+                data.push(y);
             }
-        });
-    }
 
-    // 초기 실행
-    window.onload = calculate;
-</script>
+            if (myChart) myChart.destroy();
 
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Probability Density',
+                        data: data,
+                        fill: true,
+                        backgroundColor: (context) => {
+                            const chart = context.chart;
+                            const {ctx, chartArea} = chart;
+                            if (!chartArea) return null;
+                            
+                            // 0.8 ~ 1.25 구간 강조
+                            const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+                            const stopStart = (0.8 - 0.5) / (1.5 - 0.5);
+                            const stopEnd = (1.25 - 0.5) / (1.5 - 0.5);
+                            
+                            gradient.addColorStop(0, 'rgba(203, 213, 225, 0.1)');
+                            gradient.addColorStop(stopStart, 'rgba(203, 213, 225, 0.1)');
+                            gradient.addColorStop(stopStart + 0.01, 'rgba(99, 102, 241, 0.5)');
+                            gradient.addColorStop(stopEnd - 0.01, 'rgba(99, 102, 241, 0.5)');
+                            gradient.addColorStop(stopEnd, 'rgba(203, 213, 225, 0.1)');
+                            gradient.addColorStop(1, 'rgba(203, 213, 225, 0.1)');
+                            return gradient;
+                        },
+                        borderColor: '#6366f1',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { 
+                            grid: { display: false },
+                            ticks: { 
+                                font: { size: 9, weight: 'bold' },
+                                callback: (val, index) => (index % 10 === 0) ? labels[index] : '' 
+                            }
+                        },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        window.onload = calculate;
+    </script>
 </body>
 </html>
