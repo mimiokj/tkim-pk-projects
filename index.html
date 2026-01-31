@@ -100,45 +100,37 @@
         <div class="gradient-bg rounded-[2.5rem] p-10 text-white relative shadow-2xl shadow-indigo-200 overflow-hidden">
             <div class="grid grid-cols-2 items-center relative z-10 h-full">
                 <div>
-                    <p class="text-[11px] font-bold opacity-70 uppercase tracking-[0.2em] mb-4">Required Sample Size</p>
+                    <p class="text-[11px] font-bold opacity-70 uppercase tracking-[0.2em] mb-4 text-white">Required Sample Size</p>
                     <div class="flex items-baseline">
                         <h2 id="resultN" class="text-8xl font-black italic">18</h2>
-                        <span class="text-2xl ml-4 opacity-50 font-bold italic font-serif italic italic italic">Subjects</span>
+                        <span class="text-2xl ml-4 opacity-50 font-bold italic">Subjects</span>
                     </div>
                 </div>
                 <div class="border-l border-white/20 pl-12">
-                    <p class="text-[11px] font-bold opacity-70 uppercase tracking-[0.2em] mb-4">Total Subjects (incl. Dropout)</p>
+                    <p class="text-[11px] font-bold opacity-70 uppercase tracking-[0.2em] mb-4 text-white">Total Subjects (incl. Dropout)</p>
                     <div class="flex items-baseline">
                         <h2 id="totalN" class="text-6xl font-black opacity-90">20</h2>
                         <span class="text-xl ml-3 opacity-40 font-bold uppercase italic">Enrollment</span>
                     </div>
                 </div>
             </div>
-            
             <div class="absolute bottom-8 left-10 flex items-center gap-2 opacity-80">
                 <div class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                <p class="text-[10px] font-black tracking-widest uppercase italic">Statistical Logic: 2x2 Crossover Active</p>
-            </div>
-            <div class="absolute -top-10 -right-10 opacity-10 pointer-events-none">
-                <svg width="300" height="300" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                <p id="logicIndicator" class="text-[10px] font-black tracking-widest uppercase italic">Statistical Logic: 2x2 Crossover Active</p>
             </div>
         </div>
 
         <div class="card p-10 flex flex-col justify-between border border-slate-100">
             <div class="space-y-4">
-                <h4 class="text-sm font-black text-indigo-600 uppercase italic">Methodology Note</h4>
-                <p class="text-[11px] text-slate-500 leading-relaxed font-medium">
-                    This calculation is based on the Diletti et al. (1991) approach for bioequivalence. 
-                    The algorithm assumes a log-normal distribution for AUC and Cmax. 
-                    For highly variable drugs (CV > 30%), consider a replicate design.
+                <h4 id="noteTitle" class="text-sm font-black text-indigo-600 uppercase italic">Methodology Note</h4>
+                <p id="noteContent" class="text-[11px] text-slate-500 leading-relaxed font-semibold transition-all duration-500">
+                    This calculation is based on the Diletti et al. (1991) approach. The algorithm assumes a log-normal distribution for AUC and Cmax.
                 </p>
             </div>
             <div class="pt-8 border-t border-slate-50 flex justify-between items-end">
-                <div class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-                    Daewoong Pharm PK/PD Laboratory
-                </div>
+                <div class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Daewoong Pharm PK/PD Laboratory</div>
                 <div class="bg-indigo-600 px-4 py-2 rounded-xl">
-                    <span class="text-[10px] text-white font-black italic">VER 2.0</span>
+                    <span class="text-[10px] text-white font-black italic">VER 2.1</span>
                 </div>
             </div>
         </div>
@@ -155,42 +147,62 @@
             const dropout = parseFloat(document.getElementById('dropout').value) / 100;
             const design = document.getElementById('design').value;
 
-            // Simple BE Sample Size Logic (Diletti's Table Approximation)
-            const zAlpha = 1.645; // 90% CI
-            const zBeta = power === 0.9 ? 1.282 : 0.842;
+            const zAlpha = 1.645;
+            const zBeta = (power === 0.9) ? 1.282 : 0.842;
             const sigma = Math.sqrt(Math.log(cv * cv + 1));
             
-            // Equation based on 2x2 Crossover
             let delta = Math.abs(Math.log(gmr) - Math.log(1.25));
             if (gmr < 1) delta = Math.abs(Math.log(gmr) - Math.log(0.8));
             
             let n = 2 * Math.pow((zAlpha + zBeta) * sigma / delta, 2);
-            
-            // Adjust based on design
             if (design === 'parallel') n = n * 2; 
-            if (design === '2xk') n = n * 0.75; // Approx reduction for replicate
+            if (design === '2xk') n = n * 0.75;
 
             n = Math.max(12, Math.ceil(n));
-            if (n % 2 !== 0) n++; // Ensure even for crossover
+            if (n % 2 !== 0) n++;
 
             const totalEnrollment = Math.ceil(n / (1 - dropout));
 
-            // Update UI
             document.getElementById('resultN').innerText = n;
             document.getElementById('totalN').innerText = totalEnrollment;
+            document.getElementById('logicIndicator').innerText = `Statistical Logic: ${design.toUpperCase()} Active`;
 
+            updateNote(gmr, cv, n);
             updateChart(gmr, cv);
+        }
+
+        function updateNote(gmr, cv, n) {
+            const noteTitle = document.getElementById('noteTitle');
+            const noteContent = document.getElementById('noteContent');
+            
+            let message = "This calculation is based on the Diletti et al. (1991) approach. The algorithm assumes a log-normal distribution for AUC and Cmax.";
+            noteTitle.className = "text-sm font-black text-indigo-600 uppercase italic";
+
+            // Case 1: GMR is out of range (Critical)
+            if (gmr <= 0.8 || gmr >= 1.25) {
+                noteTitle.className = "text-sm font-black text-red-500 uppercase italic animate-pulse";
+                message = `⚠️ [Critical Alert] The expected GMR (${gmr}) is outside the bioequivalence limits (0.8-1.25). The calculated sample size (${n}) is clinically and economically impractical. It is highly recommended to prioritize 'Formulation Optimization' or 'Drug Release Profile' adjustment before proceeding to clinical trials.`;
+            } 
+            // Case 2: CV is high
+            else if (cv >= 0.3) {
+                message += ` [Recommendation] High intra-subject variability detected (CV > 30%). Consider using a 'Replicate Design' (e.g., 3-way or 4-way) to reduce the required sample size and manage variability.`;
+            }
+            // Case 3: N is realistically large
+            else if (n > 100) {
+                message += ` [Warning] Large sample size detected. Evaluate the feasibility of the trial design and consider if the GMR expectation is too conservative.`;
+            }
+
+            noteContent.innerText = message;
         }
 
         function updateChart(gmr, cv) {
             const ctx = document.getElementById('distChart').getContext('2d');
             const labels = [];
             const data = [];
-            const stdDev = 0.1; // 시각화 고정 편차
+            const stdDev = 0.12; 
 
             for (let x = 0.5; x <= 1.5; x += 0.01) {
                 labels.push(x.toFixed(2));
-                // Normal Distribution Formula
                 const y = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - gmr) / stdDev, 2));
                 data.push(y);
             }
@@ -202,19 +214,15 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Probability Density',
                         data: data,
                         fill: true,
                         backgroundColor: (context) => {
                             const chart = context.chart;
                             const {ctx, chartArea} = chart;
                             if (!chartArea) return null;
-                            
-                            // 0.8 ~ 1.25 구간 강조
                             const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
                             const stopStart = (0.8 - 0.5) / (1.5 - 0.5);
                             const stopEnd = (1.25 - 0.5) / (1.5 - 0.5);
-                            
                             gradient.addColorStop(0, 'rgba(203, 213, 225, 0.1)');
                             gradient.addColorStop(stopStart, 'rgba(203, 213, 225, 0.1)');
                             gradient.addColorStop(stopStart + 0.01, 'rgba(99, 102, 241, 0.5)');
@@ -234,19 +242,12 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { 
-                            grid: { display: false },
-                            ticks: { 
-                                font: { size: 9, weight: 'bold' },
-                                callback: (val, index) => (index % 10 === 0) ? labels[index] : '' 
-                            }
-                        },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' }, callback: (val, index) => (index % 10 === 0) ? labels[index] : '' } },
                         y: { display: false }
                     }
                 }
             });
         }
-
         window.onload = calculate;
     </script>
 </body>
