@@ -12,10 +12,10 @@
     <style>
         :root {
             /* 대웅제약 브랜드 컬러 적용 */
-            --primary-color: #54565A; /* 대웅제약 로고 그레이 (전문성, 신뢰) */
-            --accent-color: #FF7A00;  /* 대웅제약 로고 오렌지 (활력, 혁신) */
-            --success-color: #27ae60; /* 긍정적 결과 그린 */
-            --bg-color: #f4f6f9;      /* 눈이 편안한 연회색 배경 */
+            --primary-color: #54565A; /* 대웅제약 로고 그레이 */
+            --accent-color: #FF7A00;  /* 대웅제약 로고 오렌지 */
+            --success-color: #27ae60; 
+            --bg-color: #f4f6f9;      
             --card-shadow: 0 10px 20px rgba(0,0,0,0.05);
         }
 
@@ -29,19 +29,19 @@
         /* 헤더 스타일 */
         .app-header {
             background: white;
-            border-bottom: 3px solid var(--accent-color); /* 오렌지색 포인트 라인 */
+            border-bottom: 3px solid var(--accent-color);
             padding: 1.2rem 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             margin-bottom: 2rem;
         }
         .brand-logo-img {
-            height: 45px; /* 로고 크기 조절 */
+            height: 45px; /* 로고 높이 */
             width: auto;
+            margin-right: 15px;
         }
         .brand-sub {
             font-size: 0.9rem;
             color: #888;
-            margin-left: 15px;
             font-weight: 600;
             padding-left: 15px;
             border-left: 2px solid #eee;
@@ -57,7 +57,7 @@
             transition: transform 0.2s;
         }
         
-        /* 탭 스타일 (오렌지색 강조) */
+        /* 탭 스타일 */
         .nav-pills .nav-link {
             color: var(--primary-color);
             font-weight: 600;
@@ -68,12 +68,12 @@
             transition: all 0.3s ease;
         }
         .nav-pills .nav-link.active {
-            background-color: var(--accent-color); /* 활성화 시 오렌지색 */
+            background-color: var(--accent-color);
             color: white;
             box-shadow: 0 4px 10px rgba(255, 122, 0, 0.3);
         }
 
-        /* 입력 폼 스타일 (Floating Label & 오렌지 포커스) */
+        /* 입력 폼 스타일 */
         .form-floating > .form-control {
             border-radius: 12px;
             border: 1px solid #e1e4e8;
@@ -81,17 +81,12 @@
         }
         .form-floating > .form-control:focus {
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.15); /* 오렌지색 글로우 효과 */
-        }
-        .input-group-text {
-            border-radius: 12px;
-            background-color: #f8f9fa;
-            border: 1px solid #e1e4e8;
+            box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.15);
         }
 
-        /* 버튼 스타일 (오렌지 그라데이션) */
+        /* 버튼 스타일 */
         .btn-calc {
-            background: linear-gradient(135deg, var(--accent-color), #FF5733); /* 강렬한 오렌지 그라데이션 */
+            background: linear-gradient(135deg, var(--accent-color), #FF5733);
             color: white;
             font-weight: 800;
             padding: 16px 30px;
@@ -107,10 +102,10 @@
             box-shadow: 0 8px 25px rgba(255, 122, 0, 0.4);
         }
 
-        /* 결과 섹션 스타일 */
+        /* 결과 섹션 */
         .result-section {
             margin-top: 2rem;
-            display: none; /* 계산 전 숨김 */
+            display: none; 
             animation: slideUp 0.5s ease forwards;
         }
         @keyframes slideUp {
@@ -133,7 +128,7 @@
             position: absolute;
             top: 0; left: 0; width: 6px; height: 100%;
         }
-        .card-cv::before { background-color: var(--accent-color); /* 오렌지색 포인트 */ }
+        .card-cv::before { background-color: var(--accent-color); }
         .card-n::before { background-color: var(--success-color); }
 
         .result-label {
@@ -150,12 +145,6 @@
             color: var(--primary-color);
         }
         .unit { font-size: 1rem; color: #999; font-weight: 500; }
-
-        .info-tooltip {
-            font-size: 0.85rem;
-            color: var(--accent-color);
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -163,8 +152,11 @@
     <header class="app-header">
         <div class="container d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-                <img src="image_4.png" alt="대웅제약 로고" class="brand-logo-img">
-                <span class="brand-sub">PK/BE Simulator (Pro Ver.)</span>
+                <img src="logo.png" alt="대웅제약 로고" class="brand-logo-img" onerror="this.style.display='none'">
+                <div>
+                    <span class="fs-4 fw-bold" style="color: var(--primary-color); letter-spacing: -1px;">PK/BE Simulator</span>
+                    <span class="brand-sub">Pro Ver.</span>
+                </div>
             </div>
             <div>
                 <span class="text-secondary small fw-bold">
@@ -199,7 +191,8 @@
                     <div class="tab-content" id="pills-tabContent">
                         
                         <div class="tab-pane fade show active" id="pills-ci" role="tabpanel">
-                            <div class="alert alert-light border-0 small mb-4" style="background-color: #FFF4E6; color: #d35400;"> <i class="bi bi-info-circle-fill me-2" style="color: var(--accent-color);"></i> 논문에 기재된 90% 신뢰구간(Confidence Interval)을 입력하세요.
+                            <div class="alert alert-light border-0 small mb-4" style="background-color: #FFF4E6; color: #d35400;">
+                                <i class="bi bi-info-circle-fill me-2" style="color: var(--accent-color);"></i> 논문에 기재된 90% 신뢰구간(Confidence Interval)을 입력하세요.
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -259,7 +252,9 @@
                             <i class="bi bi-calculator me-2"></i> Analyze & Calculate Sample Size
                         </button>
                     </div>
-                </div> <div id="resultSection" class="result-section">
+                </div> 
+
+                <div id="resultSection" class="result-section">
                     
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
@@ -321,9 +316,7 @@
         let currentCV = 0;
 
         function calculate() {
-            // 현재 활성화된 탭 확인
             const activeTab = document.querySelector('.nav-link.active').id;
-            
             if (activeTab === 'pills-ci-tab') {
                 calculateFromCI();
             } else {
@@ -339,7 +332,6 @@
             if (!L || !U || !N) { alert("모든 값을 입력해주세요."); return; }
 
             // Logic: CV = sqrt( exp( ( (lnU - lnL) / (2 * t_crit) )^2 * N/2 ) - 1 )
-            // t-critical approximation
             let t_dist = 2.0; 
             if(N > 50) t_dist = 1.96;
             else if(N > 20) t_dist = 2.07;
@@ -347,7 +339,7 @@
             let lnU = Math.log(U/100);
             let lnL = Math.log(L/100);
             let diff = lnU - lnL;
-            let se = diff / (2 * 1.71); // Approx for 90% CI t-value
+            let se = diff / (2 * 1.71); 
             let mse = Math.pow(se, 2) * N / 2;
             let cv = Math.sqrt(Math.exp(mse) - 1);
             
@@ -362,7 +354,6 @@
 
             if (!mT || !sT || !mR || !sR) { alert("모든 값을 입력해주세요."); return; }
 
-            // Naive Pooled CV approximation
             let cvT = sT / mT;
             let cvR = sR / mR;
             let pooledCV = Math.sqrt((cvT*cvT + cvR*cvR) / 2);
@@ -371,7 +362,6 @@
         }
 
         function calculateSampleSize(cv, powerTarget, gmr) {
-            // Simplified Iterative Search for N
             let sigma = Math.sqrt(Math.log(cv*cv + 1));
             let t_alpha = 1.68; 
             let t_beta = (powerTarget === 0.9) ? 1.3 : 0.85; 
@@ -385,21 +375,15 @@
         function showResult(cvVal) {
             currentCV = cvVal / 100;
             
-            // 결과 섹션 표시
             document.getElementById('resultSection').style.display = 'block';
-            
-            // CV 값 업데이트
             document.getElementById('calcCV').innerHTML = cvVal.toFixed(2) + '<span class="unit">%</span>';
             
-            // 평가 멘트
             let rating = "보통 수준의";
             if(cvVal > 30) rating = "상당히 높은(High)";
             else if(cvVal < 15) rating = "매우 낮은(Low)";
             document.getElementById('cvRating').innerText = rating;
 
             recalcN();
-
-            // 스크롤 이동
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -409,9 +393,8 @@
             let gmr = parseFloat(document.getElementById('targetGMR').value);
             
             let n = calculateSampleSize(currentCV, power, gmr);
-            // 짝수로 맞춤 (2x2 Design)
             if(n % 2 !== 0) n += 1;
-            if(n < 12) n = 12; // Minimum limit
+            if(n < 12) n = 12;
 
             document.getElementById('recN').innerHTML = n + '<span class="unit">명</span>';
             document.getElementById('finalN').innerText = n;
