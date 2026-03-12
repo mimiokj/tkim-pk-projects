@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK/BE Sample Size Calculator | 대웅제약</title>
+    <title>BE Sample Size Calculator | 대웅제약</title>
     
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,396 +11,768 @@
 
     <style>
         :root {
-            /* 대웅제약 브랜드 컬러 적용 */
-            --primary-color: #54565A; /* 대웅제약 로고 그레이 */
-            --accent-color: #FF7A00;  /* 대웅제약 로고 오렌지 */
-            --success-color: #27ae60; 
-            --bg-color: #f4f6f9;      
-            --card-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            --primary: #54565A;
+            --accent:  #FF7A00;
+            --green:   #27ae60;
+            --bg:      #f4f6f9;
+            --shadow:  0 10px 20px rgba(0,0,0,0.05);
         }
-
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--primary-color);
-            line-height: 1.6;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--primary); line-height: 1.6;
         }
 
-        /* 헤더 스타일 */
+        /* ── 헤더 ── */
         .app-header {
-            background: white;
-            border-bottom: 3px solid var(--accent-color);
-            padding: 1.2rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            margin-bottom: 2rem;
+            background: white; border-bottom: 3px solid var(--accent);
+            padding: 1.2rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 2rem;
         }
-        .brand-logo-img {
-            height: 45px; /* 로고 높이 */
-            width: auto;
-            margin-right: 15px;
-        }
+        .brand-logo-img { height: 45px; width: auto; margin-right: 15px; }
         .brand-sub {
-            font-size: 0.9rem;
-            color: #888;
-            font-weight: 600;
-            padding-left: 15px;
-            border-left: 2px solid #eee;
+            font-size: 0.9rem; color: #888; font-weight: 600;
+            padding-left: 15px; border-left: 2px solid #eee;
         }
 
-        /* 카드 공통 스타일 */
-        .custom-card {
-            background: white;
-            border-radius: 16px;
-            border: none;
-            box-shadow: var(--card-shadow);
-            padding: 2rem;
-            transition: transform 0.2s;
+        /* ── 카드 ── */
+        .card-wrap {
+            background: white; border-radius: 16px; border: none;
+            box-shadow: var(--shadow); padding: 2rem;
         }
-        
-        /* 탭 스타일 */
+
+        /* ── 탭 ── */
         .nav-pills .nav-link {
-            color: var(--primary-color);
-            font-weight: 600;
-            border-radius: 12px;
-            padding: 10px 20px;
-            margin-right: 10px;
-            background-color: #f1f3f5;
-            transition: all 0.3s ease;
+            color: var(--primary); font-weight: 600; border-radius: 12px;
+            padding: 10px 22px; margin-right: 8px; background: #f1f3f5; transition: all 0.25s;
         }
         .nav-pills .nav-link.active {
-            background-color: var(--accent-color);
-            color: white;
-            box-shadow: 0 4px 10px rgba(255, 122, 0, 0.3);
+            background: var(--accent); color: white;
+            box-shadow: 0 4px 10px rgba(255,122,0,0.3);
         }
 
-        /* 입력 폼 스타일 */
+        /* ── 입력 폼 ── */
         .form-floating > .form-control {
-            border-radius: 12px;
-            border: 1px solid #e1e4e8;
-            height: 60px;
+            border-radius: 12px; border: 1px solid #e1e4e8; height: 58px; font-size: 0.95rem;
         }
         .form-floating > .form-control:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.15);
+            border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,122,0,0.12);
+        }
+        .form-floating > label { font-size: 0.85rem; color: #999; }
+        .param-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f8f9fc; border-radius: 12px; padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+        .param-row label { font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .param-row select, .param-row input[type=number] {
+            background: transparent; border: none; font-weight: 700;
+            font-size: 0.95rem; color: var(--primary); text-align: right; outline: none; width: 120px;
         }
 
-        /* 버튼 스타일 */
+        /* ── 계산 버튼 ── */
         .btn-calc {
-            background: linear-gradient(135deg, var(--accent-color), #FF5733);
-            color: white;
-            font-weight: 800;
-            padding: 16px 30px;
-            border-radius: 12px;
-            width: 100%;
-            font-size: 1.1rem;
-            border: none;
-            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.3);
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--accent), #FF5733);
+            color: white; font-weight: 800; padding: 15px;
+            border-radius: 12px; width: 100%; font-size: 1rem; border: none;
+            box-shadow: 0 4px 15px rgba(255,122,0,0.3); transition: all 0.3s;
         }
-        .btn-calc:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 122, 0, 0.4);
-        }
+        .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,122,0,0.4); }
 
-        /* 결과 섹션 */
-        .result-section {
-            margin-top: 2rem;
-            display: none; 
-            animation: slideUp 0.5s ease forwards;
-        }
+        /* ── 결과 섹션 ── */
+        .result-section { margin-top: 2rem; display: none; animation: slideUp 0.45s ease forwards; }
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .result-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid #edf2f7;
-            box-shadow: var(--card-shadow);
-            height: 100%;
-            position: relative;
-            overflow: hidden;
+        /* ── 결과 카드 ── */
+        .res-card {
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: var(--shadow); border: 1.5px solid #f0f0f0;
+            height: 100%; position: relative; overflow: hidden;
         }
-        .result-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 6px; height: 100%;
+        .res-card::after {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 5px; height: 100%; border-radius: 4px 0 0 4px;
         }
-        .card-cv::before { background-color: var(--accent-color); }
-        .card-n::before { background-color: var(--success-color); }
+        .res-card.orange::after { background: var(--accent); }
+        .res-card.green::after  { background: var(--green); }
+        .res-card.blue::after   { background: #3b82f6; }
 
-        .result-label {
-            font-size: 0.9rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+        .res-label {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; color: #aaa; margin-bottom: 6px;
         }
-        .result-value {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--primary-color);
+        .res-value {
+            font-size: 2.6rem; font-weight: 900; line-height: 1; color: var(--primary);
         }
-        .unit { font-size: 1rem; color: #999; font-weight: 500; }
+        .res-unit { font-size: 1rem; font-weight: 500; color: #bbb; margin-left: 4px; }
+        .res-sub  { font-size: 0.78rem; color: #aaa; margin-top: 8px; }
+
+        /* ── 피험자 수 메인 ── */
+        .n-hero {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 20px; padding: 2rem 2.5rem; color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .n-hero .label  { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; }
+        .n-hero .number { font-size: 5rem; font-weight: 900; line-height: 1; }
+        .n-hero .unit   { font-size: 1.2rem; opacity: 0.4; font-weight: 500; margin-left: 8px; }
+        .n-hero .basis  { font-size: 0.75rem; opacity: 0.45; margin-top: 6px; }
+
+        /* ── 옵션 셀렉트 ── */
+        .opt-select {
+            border: none; background: rgba(255,255,255,0.08); color: white;
+            border-radius: 8px; padding: 5px 10px; font-size: 0.8rem; font-weight: 700;
+            cursor: pointer;
+        }
+        .opt-select option { color: #333; background: white; }
+
+        /* ── 알림 배지 ── */
+        .alert-hvd {
+            background: #fef9c3; border: 1px solid #fde047;
+            border-radius: 12px; padding: 12px 16px;
+            font-size: 0.82rem; color: #854d0e; font-weight: 600;
+        }
+
+        /* ── 구분선 텍스트 ── */
+        .section-title {
+            font-size: 0.7rem; font-weight: 800; letter-spacing: 2px;
+            text-transform: uppercase; color: #ccc; margin: 1.5rem 0 0.8rem;
+        }
+
+        /* ── 설계 조건 배지 ── */
+        .design-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: white; border: 1.5px solid #e1e4e8;
+            border-radius: 20px; padding: 4px 12px;
+            font-size: 0.75rem; font-weight: 700; color: var(--primary);
+        }
+        .design-badge.highlight {
+            border-color: var(--accent); background: #fff4e6; color: var(--accent);
+        }
+
+        /* ── 에러 ── */
+        #errorMsg { border-radius: 12px; font-size: 0.83rem; }
+
+        /* ── Cmax / AUC 탭 내부 ── */
+        .pk-tab-btn {
+            flex: 1; padding: 9px; border-radius: 10px;
+            border: 1.5px solid #e1e4e8; background: white;
+            font-weight: 700; font-size: 0.83rem; color: #888;
+            cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .pk-tab-btn.active {
+            border-color: var(--accent); background: #fff4e6; color: var(--accent);
+        }
     </style>
 </head>
 <body>
 
-    <header class="app-header">
-        <div class="container d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="logo.png" alt="대웅제약 로고" class="brand-logo-img" onerror="this.style.display='none'">
-                <div>
-                    <span class="fs-4 fw-bold" style="color: var(--primary-color); letter-spacing: -1px;">PK/BE Simulator</span>
-                    <span class="brand-sub">Pro Ver.</span>
-                </div>
-            </div>
+<header class="app-header">
+    <div class="container d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <img src="logo.png" alt="대웅제약 로고" class="brand-logo-img" onerror="this.style.display='none'">
             <div>
-                <span class="text-secondary small fw-bold">
-                    <i class="bi bi-person-circle me-1" style="color: var(--accent-color);"></i> 김태헌 박사
-                </span>
+                <span class="fs-4 fw-bold" style="color:var(--primary); letter-spacing:-1px;">BE Sample Size Calculator</span>
+                <span class="brand-sub">Pro Ver.</span>
             </div>
         </div>
-    </header>
-
-    <div class="container pb-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-xl-7">
-                
-                <div class="custom-card">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-color);">
-                        <i class="bi bi-sliders me-2" style="color: var(--accent-color);"></i>Study Design Parameters
-                    </h4>
-                    
-                    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="pills-ci-tab" data-bs-toggle="pill" data-bs-target="#pills-ci" type="button">
-                                <i class="bi bi-journal-text me-1"></i> 문헌 CI 기반
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pills-mean-tab" data-bs-toggle="pill" data-bs-target="#pills-mean" type="button">
-                                <i class="bi bi-bar-chart-fill me-1"></i> Mean/SD 기반
-                            </button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="pills-tabContent">
-                        
-                        <div class="tab-pane fade show active" id="pills-ci" role="tabpanel">
-                            <div class="alert alert-light border-0 small mb-4" style="background-color: #FFF4E6; color: #d35400;">
-                                <i class="bi bi-info-circle-fill me-2" style="color: var(--accent-color);"></i> 논문에 기재된 90% 신뢰구간(Confidence Interval)을 입력하세요.
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="lowerCI" placeholder="80" step="0.1">
-                                        <label for="lowerCI">Lower Limit (%)</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="upperCI" placeholder="125" step="0.1">
-                                        <label for="upperCI">Upper Limit (%)</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="nLit" placeholder="24">
-                                        <label for="nLit">문헌 내 피험자 수 (N)</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="pills-mean" role="tabpanel">
-                            <div class="alert alert-light border-0 small mb-4" style="background-color: #FFF4E6; color: #d35400;">
-                                <i class="bi bi-info-circle-fill me-2" style="color: var(--accent-color);"></i> 로그변환 전의 산술 평균(Arithmetic Mean)과 표준편차(SD)를 입력하세요.
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <h6 class="small fw-bold mb-2" style="color: var(--primary-color);">Test Drug</h6>
-                                    <div class="form-floating mb-2">
-                                        <input type="number" class="form-control" id="meanT" placeholder="Mean">
-                                        <label>Mean</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="sdT" placeholder="SD">
-                                        <label>SD</label>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <h6 class="small fw-bold mb-2" style="color: var(--primary-color);">Reference Drug</h6>
-                                    <div class="form-floating mb-2">
-                                        <input type="number" class="form-control" id="meanR" placeholder="Mean">
-                                        <label>Mean</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="sdR" placeholder="SD">
-                                        <label>SD</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-2">
-                        <button onclick="calculate()" class="btn-calc">
-                            <i class="bi bi-calculator me-2"></i> Analyze & Calculate Sample Size
-                        </button>
-                    </div>
-                </div> 
-
-                <div id="resultSection" class="result-section">
-                    
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="result-card card-cv">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="result-label" style="color: var(--accent-color);">Estimated Intra-CV</div>
-                                        <div class="result-value" id="calcCV">0.0<span class="unit">%</span></div>
-                                    </div>
-                                    <i class="bi bi-activity fs-1 opacity-25" style="color: var(--accent-color);"></i>
-                                </div>
-                                <div class="small text-muted mt-2">
-                                    <i class="bi bi-check-circle-fill me-1" style="color: var(--accent-color);"></i> 문헌 데이터를 역산한 결과
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="result-card card-n">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="result-label" style="color: var(--success-color);">Recommended N</div>
-                                        <div class="result-value" id="recN">0<span class="unit">명</span></div>
-                                    </div>
-                                    <i class="bi bi-people-fill fs-1 opacity-25" style="color: var(--success-color);"></i>
-                                </div>
-                                
-                                <div class="mt-3 bg-light p-2 rounded d-flex gap-2">
-                                    <select id="targetPower" class="form-select form-select-sm border-0 fw-bold" style="color: var(--primary-color);" onchange="recalcN()">
-                                        <option value="0.8">Power 80%</option>
-                                        <option value="0.9" selected>Power 90%</option>
-                                    </select>
-                                    <select id="targetGMR" class="form-select form-select-sm border-0 fw-bold" style="color: var(--primary-color);" onchange="recalcN()">
-                                        <option value="0.95" selected>GMR 0.95</option>
-                                        <option value="1.0">GMR 1.00</option>
-                                        <option value="0.9">GMR 0.90</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="custom-card py-4" style="border-left: 4px solid var(--primary-color);">
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-color);"><i class="bi bi-clipboard-data me-2" style="color: var(--accent-color);"></i>Analysis Insight</h6>
-                        <p class="text-muted mb-0 small">
-                            현재 입력된 문헌 데이터는 <strong id="cvRating" style="color: var(--accent-color);"></strong> 변동성을 보입니다. 
-                            안전한 BE 성공을 위해 최소 <strong id="finalN" class="fs-5" style="color: var(--success-color);"></strong>명 이상의 피험자가 권장됩니다.
-                            (2x2 Crossover Design, α=0.05 기준)
-                        </p>
-                    </div>
-
-                </div>
-
-            </div>
+        <div>
+            <span class="text-secondary small fw-bold">
+                <i class="bi bi-person-circle me-1" style="color:var(--accent);"></i>Developer · Taeheon Kim, PhD
+            </span>
         </div>
     </div>
+</header>
 
-    <script>
-        let currentCV = 0;
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
 
-        function calculate() {
-            const activeTab = document.querySelector('.nav-link.active').id;
-            if (activeTab === 'pills-ci-tab') {
-                calculateFromCI();
-            } else {
-                calculateFromMeanSD();
-            }
+            <!-- ══ 입력 카드 ══ -->
+            <div class="card-wrap">
+                <h5 class="fw-bold mb-1" style="color:var(--primary);">
+                    <i class="bi bi-sliders me-2" style="color:var(--accent);"></i>Study Design Parameters
+                </h5>
+                <p class="text-muted small mb-4">문헌 데이터를 입력하여 권장 피험자 수를 산출합니다.</p>
+
+                <!-- 입력 방법 탭 -->
+                <ul class="nav nav-pills mb-4" id="mainTab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="tab-ci" data-bs-toggle="pill" data-bs-target="#pane-ci" type="button">
+                            <i class="bi bi-journal-text me-1"></i>문헌 90% CI
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tab-mean" data-bs-toggle="pill" data-bs-target="#pane-mean" type="button">
+                            <i class="bi bi-bar-chart-fill me-1"></i>Mean / SD
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+
+                    <!-- ── 탭 1: 90% CI ── -->
+                    <div class="tab-pane fade show active" id="pane-ci" role="tabpanel">
+
+                        <!-- 문헌 설계 선택 -->
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold mb-2" style="color:#888; text-transform:uppercase; letter-spacing:0.5px;">
+                                <i class="bi bi-book me-1" style="color:var(--accent);"></i>문헌의 Study Design
+                            </label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="pk-tab-btn active" id="litBtn-2x2" onclick="selectLitDesign('2x2')">2×2 Crossover</button>
+                                <button class="pk-tab-btn" id="litBtn-parallel" onclick="selectLitDesign('parallel')">Parallel</button>
+                                <button class="pk-tab-btn" id="litBtn-2x3" onclick="selectLitDesign('2x3')">2×3 Replicate</button>
+                                <button class="pk-tab-btn" id="litBtn-2x4" onclick="selectLitDesign('2x4')">2×4 Replicate</button>
+                            </div>
+                        </div>
+
+                        <!-- Cmax / AUClast 나란히 입력 -->
+                        <div class="row g-3">
+
+                            <!-- Cmax -->
+                            <div class="col-12 col-md-6">
+                                <div class="p-3 rounded-3" style="background:#fff8f2; border:1.5px solid #ffe0c2;">
+                                    <div class="fw-bold small mb-3" style="color:var(--accent);">
+                                        <i class="bi bi-activity me-1"></i>C<sub>max</sub>
+                                        <span class="ms-2 text-muted fw-normal" style="font-size:0.7rem;">90% CI (%)</span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control" id="cmax-lower" placeholder="80" step="0.1" style="font-size:0.9rem;">
+                                                <label style="font-size:0.8rem;">Lower</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control" id="cmax-upper" placeholder="125" step="0.1" style="font-size:0.9rem;">
+                                                <label style="font-size:0.8rem;">Upper</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AUClast -->
+                            <div class="col-12 col-md-6">
+                                <div class="p-3 rounded-3" style="background:#f0f7ff; border:1.5px solid #bfdbfe;">
+                                    <div class="fw-bold small mb-3" style="color:#2563eb;">
+                                        <i class="bi bi-graph-up me-1"></i>AUC<sub>last</sub>
+                                        <span class="ms-2 text-muted fw-normal" style="font-size:0.7rem;">90% CI (%)</span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control" id="auc-lower" placeholder="80" step="0.1" style="font-size:0.9rem;">
+                                                <label style="font-size:0.8rem;">Lower</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control" id="auc-upper" placeholder="125" step="0.1" style="font-size:0.9rem;">
+                                                <label style="font-size:0.8rem;">Upper</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 공통 N -->
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="nLit" placeholder="24" min="6">
+                                    <label>문헌 피험자 수 (N)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 탭 2: Mean/SD → Intra-CV 추정 ── -->
+                    <div class="tab-pane fade" id="pane-mean" role="tabpanel">
+
+                        <p class="small text-muted mb-3">
+                            문헌에 보고된 <strong>Cmax</strong> 또는 <strong>AUC<sub>last</sub></strong>의
+                            산술 평균(Mean)과 표준편차(SD)를 입력하면 Intra-CV를 추정합니다.
+                        </p>
+
+                        <!-- Cmax / AUC 선택 -->
+                        <div class="d-flex gap-2 mb-4">
+                            <button class="pk-tab-btn active" id="pkBtn-cmax" onclick="selectPK('cmax')">
+                                C<sub>max</sub>
+                            </button>
+                            <button class="pk-tab-btn" id="pkBtn-auc" onclick="selectPK('auc')">
+                                AUC<sub>last</sub>
+                            </button>
+                            <button class="pk-tab-btn" id="pkBtn-both" onclick="selectPK('both')">
+                                둘 다 입력
+                            </button>
+                        </div>
+
+                        <!-- Cmax 입력 -->
+                        <div id="block-cmax">
+                            <p class="section-title">C<sub>max</sub></p>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="cmax-meanT" placeholder="Mean" min="0">
+                                        <label>Test — Mean</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="cmax-sdT" placeholder="SD" min="0">
+                                        <label>Test — SD</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="cmax-meanR" placeholder="Mean" min="0">
+                                        <label>Reference — Mean</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="cmax-sdR" placeholder="SD" min="0">
+                                        <label>Reference — SD</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AUClast 입력 -->
+                        <div id="block-auc" class="d-none">
+                            <p class="section-title">AUC<sub>last</sub></p>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="auc-meanT" placeholder="Mean" min="0">
+                                        <label>Test — Mean</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="auc-sdT" placeholder="SD" min="0">
+                                        <label>Test — SD</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="auc-meanR" placeholder="Mean" min="0">
+                                        <label>Reference — Mean</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="auc-sdR" placeholder="SD" min="0">
+                                        <label>Reference — SD</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 공통 옵션 -->
+                <div class="mt-4 pt-3 border-top">
+                    <p class="section-title" style="margin-top:0;">우리 시험 설계 조건</p>
+                    <div class="param-row">
+                        <label>Study Design</label>
+                        <select id="studyDesign" onchange="onDesignChange()">
+                            <option value="2x2" selected>2×2 Crossover</option>
+                            <option value="parallel">Parallel</option>
+                            <option value="2x3">2×3 Replicate</option>
+                            <option value="2x4">2×4 Replicate</option>
+                        </select>
+                    </div>
+                    <div class="param-row">
+                        <label>Target Power</label>
+                        <select id="targetPower" onchange="recalcN()">
+                            <option value="0.8">80%</option>
+                            <option value="0.9" selected>90%</option>
+                        </select>
+                    </div>
+                    <div class="param-row">
+                        <label>Expected GMR</label>
+                        <select id="targetGMR" onchange="recalcN()">
+                            <option value="0.95" selected>0.95</option>
+                            <option value="1.0">1.00</option>
+                            <option value="0.9">0.90</option>
+                        </select>
+                    </div>
+                    <div class="param-row">
+                        <label>Dropout Rate</label>
+                        <select id="dropoutRate" onchange="recalcN()">
+                            <option value="0">0%</option>
+                            <option value="10" selected>10%</option>
+                            <option value="15">15%</option>
+                            <option value="20">20%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 에러 -->
+                <div id="errorMsg" class="alert alert-danger mt-3 d-none"></div>
+
+                <button onclick="calculate()" class="btn-calc mt-4">
+                    <i class="bi bi-calculator me-2"></i>Calculate Sample Size
+                </button>
+            </div>
+
+            <!-- ══ 결과 섹션 ══ -->
+            <div id="resultSection" class="result-section">
+
+                <!-- CV 결과 카드들 -->
+                <div class="row g-3 mb-3" id="cvCards"></div>
+
+                <!-- 시험 설계 조건 요약 배지 -->
+                <div id="designSummary" class="mb-3 p-3 rounded-3 d-flex flex-wrap gap-2 align-items-center" 
+                     style="background:#f8f9fc; border:1px solid #e8eaed;">
+                    <span class="text-muted" style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;">
+                        <i class="bi bi-gear-fill me-1" style="color:var(--accent);"></i>계산 조건
+                    </span>
+                    <span id="badge-design"  class="design-badge"></span>
+                    <span id="badge-power"   class="design-badge"></span>
+                    <span id="badge-gmr"     class="design-badge"></span>
+                    <span id="badge-dropout" class="design-badge"></span>
+                </div>
+
+                <!-- 피험자 수 메인 -->
+                <div class="n-hero mb-3">
+                    <div class="label">Required Sample Size</div>
+                    <div class="d-flex align-items-baseline mt-1">
+                        <div class="number" id="resN">—</div>
+                        <div class="unit">명</div>
+                    </div>
+                    <div class="basis" id="resBasis"></div>
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <select class="opt-select" id="studyDesign2" onchange="syncAndRecalc('design')">
+                            <option value="2x2" selected>2×2 Crossover</option>
+                            <option value="parallel">Parallel</option>
+                            <option value="2x3">2×3 Replicate</option>
+                            <option value="2x4">2×4 Replicate</option>
+                        </select>
+                        <select class="opt-select" id="targetPower2" onchange="syncAndRecalc('power')">
+                            <option value="0.8">Power 80%</option>
+                            <option value="0.9" selected>Power 90%</option>
+                        </select>
+                        <select class="opt-select" id="targetGMR2" onchange="syncAndRecalc('gmr')">
+                            <option value="0.95" selected>GMR 0.95</option>
+                            <option value="1.0">GMR 1.00</option>
+                            <option value="0.9">GMR 0.90</option>
+                        </select>
+                        <select class="opt-select" id="dropoutRate2" onchange="syncAndRecalc('dropout')">
+                            <option value="0">Dropout 0%</option>
+                            <option value="10" selected>Dropout 10%</option>
+                            <option value="15">Dropout 15%</option>
+                            <option value="20">Dropout 20%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- HVD 경고 -->
+                <div id="hvdAlert" class="alert-hvd d-none mb-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>High Variability Drug (CV ≥ 30%)</strong> — Replicate Design 또는 Reference-Scaled BE 적용을 검토하세요.
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── 상태 ──
+    let activePK   = 'cmax';    // 'cmax' | 'auc' | 'both'
+    let computedCV = 0;          // 최종 계산에 쓸 CV (fraction)
+    let cvSource   = '';         // 표시용 출처 텍스트
+
+    // ── PK 파라미터 선택 ──
+    function selectPK(type) {
+        activePK = type;
+        ['cmax','auc','both'].forEach(t => {
+            document.getElementById('pkBtn-' + t).classList.toggle('active', t === type);
+        });
+        document.getElementById('block-cmax').classList.toggle('d-none', type === 'auc');
+        document.getElementById('block-auc').classList.toggle('d-none',  type === 'cmax');
+    }
+
+    // ── 에러 ──
+    function showError(msg) {
+        const el = document.getElementById('errorMsg');
+        el.textContent = '⚠ ' + msg;
+        el.classList.remove('d-none');
+    }
+    function clearError() { document.getElementById('errorMsg').classList.add('d-none'); }
+
+    // ── 메인 계산 ──
+    function calculate() {
+        clearError();
+        const activeTab = document.querySelector('#mainTab .nav-link.active').id;
+        if (activeTab === 'tab-ci') {
+            runCI();
+        } else {
+            runMeanSD();
+        }
+    }
+
+    // ── 문헌 설계 선택 ──
+    let litDesign = '2x2';
+    function selectLitDesign(d) {
+        litDesign = d;
+        ['2x2','parallel','2x3','2x4'].forEach(t => {
+            document.getElementById('litBtn-' + t).classList.toggle('active', t === d);
+        });
+    }
+
+    // ── CI 역산 (PowerTOST::CVfromCI 정확한 공식) ──
+    function runCI() {
+        const N = parseFloat(document.getElementById('nLit').value);
+        const cmaxL = parseFloat(document.getElementById('cmax-lower').value);
+        const cmaxU = parseFloat(document.getElementById('cmax-upper').value);
+        const aucL  = parseFloat(document.getElementById('auc-lower').value);
+        const aucU  = parseFloat(document.getElementById('auc-upper').value);
+
+        const hasCmax = !isNaN(cmaxL) && !isNaN(cmaxU);
+        const hasAuc  = !isNaN(aucL)  && !isNaN(aucU);
+
+        if (!hasCmax && !hasAuc) { showError("Cmax 또는 AUClast 중 하나 이상 입력해주세요."); return; }
+        if (isNaN(N) || N < 6)  { showError("피험자 수는 최소 6 이상이어야 합니다."); return; }
+        if (hasCmax && cmaxL >= cmaxU) { showError("Cmax: Lower가 Upper보다 작아야 합니다."); return; }
+        if (hasAuc  && aucL  >= aucU)  { showError("AUClast: Lower가 Upper보다 작아야 합니다."); return; }
+
+        // PowerTOST CVfromCI 공식
+        function calcCV(lower, upper) {
+            const bkMap = { '2x2': 2, 'parallel': 4, '2x3': 3, '2x4': 4 };
+            const bk = bkMap[litDesign];
+            const df = N - 2;
+            const tCrit = jStat.studentt.inv(0.95, df);
+            const hw  = (Math.log(upper / 100) - Math.log(lower / 100)) / 2;
+            const se  = hw / tCrit;
+            const mse = se * se * N / bk;
+            return Math.sqrt(Math.exp(mse) - 1) * 100;
         }
 
-        function calculateFromCI() {
-            let L = parseFloat(document.getElementById('lowerCI').value);
-            let U = parseFloat(document.getElementById('upperCI').value);
-            let N = parseFloat(document.getElementById('nLit').value);
+        const litLabel = {
+            '2x2':'2×2 Crossover','parallel':'Parallel',
+            '2x3':'2×3 Replicate','2x4':'2×4 Replicate'
+        }[litDesign];
 
-            if (!L || !U || !N) { alert("모든 값을 입력해주세요."); return; }
+        const cards = [];
+        let cvCmax = null, cvAuc = null;
 
-            // Logic: CV = sqrt( exp( ( (lnU - lnL) / (2 * t_crit) )^2 * N/2 ) - 1 )
-            let t_dist = 2.0; 
-            if(N > 50) t_dist = 1.96;
-            else if(N > 20) t_dist = 2.07;
-            
-            let lnU = Math.log(U/100);
-            let lnL = Math.log(L/100);
-            let diff = lnU - lnL;
-            let se = diff / (2 * 1.71); 
-            let mse = Math.pow(se, 2) * N / 2;
-            let cv = Math.sqrt(Math.exp(mse) - 1);
-            
-            showResult(cv * 100);
+        if (hasCmax) {
+            cvCmax = calcCV(cmaxL, cmaxU);
+            cards.push({ key: 'cmax', label: 'C<sub>max</sub> CV', value: cvCmax, color: 'orange' });
+        }
+        if (hasAuc) {
+            cvAuc = calcCV(aucL, aucU);
+            cards.push({ key: 'auc',  label: 'AUC<sub>last</sub> CV', value: cvAuc, color: 'blue' });
         }
 
-        function calculateFromMeanSD() {
-            let mT = parseFloat(document.getElementById('meanT').value);
-            let sT = parseFloat(document.getElementById('sdT').value);
-            let mR = parseFloat(document.getElementById('meanR').value);
-            let sR = parseFloat(document.getElementById('sdR').value);
+        // 더 큰 CV를 N 계산에 사용 (보수적)
+        const maxCV = Math.max(cvCmax ?? 0, cvAuc ?? 0);
+        const dominant = (cvCmax ?? 0) >= (cvAuc ?? 0) ? 'cmax' : 'auc';
+        computedCV = maxCV / 100;
+        cvSource   = `90% CI 역산 (문헌: ${litLabel})`;
 
-            if (!mT || !sT || !mR || !sR) { alert("모든 값을 입력해주세요."); return; }
+        // 카드에 "N 계산 적용" 배지 표시
+        const rendered = cards.map(c => ({
+            ...c,
+            isMain: cards.length === 1 || c.key === dominant,
+            sub: c.key === dominant && cards.length > 1
+                ? '▲ 더 큰 CV — N 계산에 적용됨'
+                : cards.length > 1 ? '참고값' : `문헌 ${litLabel} 기반 역산`
+        }));
 
-            let cvT = sT / mT;
-            let cvR = sR / mR;
-            let pooledCV = Math.sqrt((cvT*cvT + cvR*cvR) / 2);
+        renderCVCards(rendered);
+        renderN();
+    }
 
-            showResult(pooledCV * 100);
+    // ── Mean/SD → Intra-CV 추정 ──
+    function runMeanSD() {
+        const results = [];
+
+        if (activePK === 'cmax' || activePK === 'both') {
+            const v = getCVFromBlock('cmax');
+            if (!v) return;
+            results.push({ label: 'C<sub>max</sub> 추정 Intra-CV', value: v, color: 'orange' });
+        }
+        if (activePK === 'auc' || activePK === 'both') {
+            const v = getCVFromBlock('auc');
+            if (!v) return;
+            results.push({ label: 'AUC<sub>last</sub> 추정 Intra-CV', value: v, color: 'blue' });
         }
 
-        function calculateSampleSize(cv, powerTarget, gmr) {
-            let sigma = Math.sqrt(Math.log(cv*cv + 1));
-            let t_alpha = 1.68; 
-            let t_beta = (powerTarget === 0.9) ? 1.3 : 0.85; 
-            let effect = Math.log(1.25) - Math.abs(Math.log(gmr));
-            if (effect <= 0) effect = 0.01;
+        if (results.length === 0) return;
 
-            let estimatedN = 2 * Math.pow((t_alpha + t_beta) * sigma / effect, 2);
-            return Math.ceil(estimatedN);
+        // N 계산엔 더 큰 CV(보수적) 사용
+        const maxCV = Math.max(...results.map(r => r.value)) / 100;
+        computedCV = maxCV;
+        cvSource   = activePK === 'both'
+            ? 'Cmax / AUClast Mean·SD 기반 추정 (보수적 적용)'
+            : (activePK === 'cmax' ? 'Cmax' : 'AUClast') + ' Mean·SD 기반 추정';
+
+        renderCVCards(results.map(r => ({
+            ...r,
+            sub: '추정 Intra-CV (참고값)'
+        })));
+        renderN();
+    }
+
+    // ── 블록에서 CV 계산 ──
+    function getCVFromBlock(prefix) {
+        const mT = parseFloat(document.getElementById(prefix + '-meanT').value);
+        const sT = parseFloat(document.getElementById(prefix + '-sdT').value);
+        const mR = parseFloat(document.getElementById(prefix + '-meanR').value);
+        const sR = parseFloat(document.getElementById(prefix + '-sdR').value);
+
+        if (isNaN(mT)||isNaN(sT)||isNaN(mR)||isNaN(sR)) {
+            showError("모든 Mean / SD 값을 입력해주세요.");
+            return null;
+        }
+        if (mT<=0||mR<=0) { showError("Mean은 양수여야 합니다."); return null; }
+        if (sT<=0||sR<=0) { showError("SD는 양수여야 합니다."); return null; }
+
+        // Total CV (log-normal)
+        const sig2T = Math.log(1 + Math.pow(sT/mT, 2));
+        const sig2R = Math.log(1 + Math.pow(sR/mR, 2));
+        const cvTotal = Math.sqrt(Math.exp((sig2T + sig2R) / 2) - 1);
+
+        // × 0.707 → 추정 Intra-CV
+        return cvTotal * 0.707 * 100;
+    }
+
+    // ── CV 카드 렌더 ──
+    function renderCVCards(cards) {
+        const row = document.getElementById('cvCards');
+        row.innerHTML = '';
+        const col = cards.length === 1 ? 'col-12' : 'col-6';
+
+        cards.forEach(c => {
+            const mainBadge = c.isMain && cards.length > 1
+                ? `<span style="background:#dcfce7; color:#16a34a; font-size:0.7rem; font-weight:800;
+                               padding:3px 10px; border-radius:20px; display:inline-block; margin-top:6px;">
+                       ✓ N 계산 적용
+                   </span>`
+                : '';
+            const dimStyle = (!c.isMain && cards.length > 1) ? 'opacity:0.55;' : '';
+
+            row.innerHTML += `
+                <div class="${col}">
+                    <div class="res-card ${c.color}" style="${dimStyle}">
+                        <div class="res-label">${c.label}</div>
+                        <div class="res-value">${c.value.toFixed(1)}<span class="res-unit">%</span></div>
+                        <div class="res-sub">${c.sub}</div>
+                        ${mainBadge}
+                    </div>
+                </div>`;
+        });
+
+        const sec = document.getElementById('resultSection');
+        sec.style.display = 'block';
+        sec.style.animation = 'none';
+        sec.offsetHeight;
+        sec.style.animation = 'slideUp 0.45s ease forwards';
+        sec.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ── 설계 변경 시 동기화 ──
+    function onDesignChange() {
+        document.getElementById('studyDesign2').value = document.getElementById('studyDesign').value;
+        recalcN();
+    }
+
+    // ── N 계산 (설계별 보정 포함) ──
+    function renderN() { recalcN(); }
+
+    function recalcN() {
+        if (!computedCV) return;
+        const power   = parseFloat(document.getElementById('targetPower').value);
+        const gmr     = parseFloat(document.getElementById('targetGMR').value);
+        const dropout = parseFloat(document.getElementById('dropoutRate').value) / 100;
+        const design  = document.getElementById('studyDesign').value;
+
+        const sigma  = Math.sqrt(Math.log(computedCV * computedCV + 1));
+        const zAlpha = 1.645, zBeta = (power === 0.9) ? 1.282 : 0.842;
+        const dLow   = Math.log(gmr) - Math.log(0.8);
+        const dHigh  = Math.log(1.25) - Math.log(gmr);
+        const delta  = Math.min(dLow, dHigh);
+
+        if (delta <= 0) { document.getElementById('resN').textContent = '—'; return; }
+
+        // 기본 n (2×2 crossover 기준)
+        let n = 2 * Math.pow((zAlpha + zBeta) * sigma / delta, 2);
+
+        // 설계별 보정
+        if (design === 'parallel') {
+            // Parallel: σ에 √2 반영 + 두 그룹 합산 → 총 2배
+            n = 4 * Math.pow((zAlpha + zBeta) * sigma / delta, 2);
+        } else if (design === '2x3') {
+            // 2×3 Replicate: 3 period → 분산 감소 (2/3 보정)
+            n = n * (2 / 3);
+        } else if (design === '2x4') {
+            // 2×4 Replicate: 4 period → 분산 감소 (2/4 = 1/2 보정)
+            n = n * 0.5;
         }
 
-        function showResult(cvVal) {
-            currentCV = cvVal / 100;
-            
-            document.getElementById('resultSection').style.display = 'block';
-            document.getElementById('calcCV').innerHTML = cvVal.toFixed(2) + '<span class="unit">%</span>';
-            
-            let rating = "보통 수준의";
-            if(cvVal > 30) rating = "상당히 높은(High)";
-            else if(cvVal < 15) rating = "매우 낮은(Low)";
-            document.getElementById('cvRating').innerText = rating;
+        n = Math.ceil(n);
+        if (n % 2 !== 0) n++;
+        n = Math.max(12, n);
 
-            recalcN();
-            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
-        }
+        const total = Math.ceil(n / (1 - dropout));
 
-        function recalcN() {
-            if(currentCV === 0) return;
-            let power = parseFloat(document.getElementById('targetPower').value);
-            let gmr = parseFloat(document.getElementById('targetGMR').value);
-            
-            let n = calculateSampleSize(currentCV, power, gmr);
-            if(n % 2 !== 0) n += 1;
-            if(n < 12) n = 12;
+        const designLabel = {
+            '2x2':      '2×2 Crossover',
+            'parallel': 'Parallel',
+            '2x3':      '2×3 Replicate',
+            '2x4':      '2×4 Replicate'
+        }[design];
 
-            document.getElementById('recN').innerHTML = n + '<span class="unit">명</span>';
-            document.getElementById('finalN').innerText = n;
-        }
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        document.getElementById('resN').textContent = total;
+        document.getElementById('resBasis').textContent =
+            `${designLabel} | 최소 ${n}명 + Dropout 보정 → 총 ${total}명 권장 | ${cvSource}`;
+
+        // 설계 조건 배지 업데이트
+        const designIcons = { '2x2':'⇄', 'parallel':'⇒⇒', '2x3':'↻×3', '2x4':'↻×4' };
+        document.getElementById('badge-design').innerHTML =
+            `${designIcons[design] || ''} ${designLabel}`;
+        document.getElementById('badge-design').className =
+            'design-badge highlight';
+        document.getElementById('badge-power').innerHTML =
+            `<i class="bi bi-lightning-fill" style="color:#f59e0b;"></i> Power ${(power*100).toFixed(0)}%`;
+        document.getElementById('badge-power').className = 'design-badge';
+        document.getElementById('badge-gmr').innerHTML =
+            `<i class="bi bi-arrows-collapse" style="color:#6366f1;"></i> GMR ${gmr}`;
+        document.getElementById('badge-gmr').className = 'design-badge';
+        document.getElementById('badge-dropout').innerHTML =
+            `<i class="bi bi-person-dash" style="color:#94a3b8;"></i> Dropout ${(dropout*100).toFixed(0)}%`;
+        document.getElementById('badge-dropout').className = 'design-badge';
+
+        document.getElementById('hvdAlert').classList.toggle('d-none', computedCV * 100 < 30);
+
+        // 결과 셀렉터 동기화
+        document.getElementById('studyDesign2').value  = design;
+        document.getElementById('targetPower2').value  = power;
+        document.getElementById('targetGMR2').value    = gmr;
+        document.getElementById('dropoutRate2').value  = (dropout * 100).toString();
+    }
+
+    // ── 결과 섹션 옵션 변경 시 상단 동기화 ──
+    function syncAndRecalc(type) {
+        if (type === 'design')  document.getElementById('studyDesign').value  = document.getElementById('studyDesign2').value;
+        if (type === 'power')   document.getElementById('targetPower').value  = document.getElementById('targetPower2').value;
+        if (type === 'gmr')     document.getElementById('targetGMR').value    = document.getElementById('targetGMR2').value;
+        if (type === 'dropout') document.getElementById('dropoutRate').value  = document.getElementById('dropoutRate2').value;
+        recalcN();
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jstat@1.9.6/dist/jstat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
